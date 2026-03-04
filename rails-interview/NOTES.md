@@ -165,6 +165,30 @@ Together, retries plus structured logging make the sync layer resilient and diag
 
 ---
 
+## Real-time completed items (UI)
+
+The Todo List show view updates the list of items in real time when items are marked completed, so that all clients viewing the same list see changes without reloading. Counts (completed/pending/total) are not shown on the show view and are not updated in real time.
+
+### Escenario “un ítem” (single item complete)
+
+When a user marks one item as completed (button “Complete” on a row):
+
+- The client that clicked receives the usual Turbo Stream response and the items frame is updated (that row shows as completed).
+- The server also broadcasts a Turbo Stream `replace` for that item to the todo list’s stream (`Turbo::StreamsChannel.broadcast_replace_to(todo_list, ...)`). Every browser that has the list open and is subscribed via `turbo_stream_from todo_list` receives this broadcast. If the completed item is on the current page, its row updates to the completed state; if not, only the summary (if present) would change — in this app the summary is removed, so only the item row updates when it is in view.
+
+### Escenario “bulk” (complete selected / complete all)
+
+When the user completes multiple items ( “Complete selected” or “Complete all”):
+
+- The request is handled synchronously and the job `ItemsBulkUpdateJob` runs. It marks the items completed and then broadcasts a message `{ action: "refresh_items" }` on the Action Cable channel `todo_list_<id>` (no Turbo Stream replace of the whole frame, to avoid forcing page 1 for everyone).
+- Each client that has the list open is subscribed to `TodoListChannel` for that list (via a Stimulus controller). On receiving `refresh_items`, the client refreshes only the items frame: it sets the frame’s `src` to the current page URL (including `?page=...`). Turbo fetches that URL and replaces the frame with the matching fragment from the response, so each user sees their current page updated with the new completed state.
+
+### Escalar (WebSockets)
+
+The implementation uses Rails’ built-in Action Cable (with Redis adapter in development/production). For higher scale (many concurrent WebSocket connections), [AnyCable](https://anycable.io/) can be used as a drop-in replacement: it is compatible with the Action Cable API, so the same channels and broadcasts work; you run an AnyCable server and point the client to it instead of the default `/cable` endpoint.
+
+---
+
 ## Assumptions
 
 - **External API**:
