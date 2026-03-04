@@ -49,7 +49,11 @@
        data-todo-list-refresh-frame-id-value="<%= dom_id(todo_list, :items) %>">
     <%= form_with url: complete_selected_todo_list_items_path(todo_list),
                   method: :patch,
-                  data: { turbo_frame: dom_id(todo_list, :items), items_selection_target: "form" } do |f| %>
+                  data: {
+                    turbo_frame: dom_id(todo_list, :items),
+                    items_selection_target: "form",
+                    action: "submit->items-selection#syncSelection"
+                  } do |f| %>
       <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
       <div class="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3">
         <h2 class="font-semibold text-slate-900 text-sm">
@@ -82,10 +86,10 @@
           </div>
         </div>
       </div>
-
-      <div class="mt-4">
-        <%= render "items_frame", todo_list: todo_list, items: @items, pagy: @pagy %>
-      </div>
     <% end %>
+
+    <div class="mt-4">
+      <%= render "items_frame", todo_list: todo_list, items: @items, pagy: @pagy %>
+    </div>
   </div>
 </div>
