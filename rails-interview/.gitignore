@@ -4,8 +4,10 @@
 # or operating system, you probably want to add a global ignore instead:
 #   git config --global core.excludesfile '~/.gitignore_global'
 
-# Ignore SQLite3 databases
+# Ignore SQLite3 databases and WAL files
 rails_interview_development
+rails_interview_development-shm
+rails_interview_development-wal
 rails_interview_test
 
 # Ignore bundler config.

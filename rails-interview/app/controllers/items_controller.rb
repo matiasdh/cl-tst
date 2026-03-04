@@ -1,5 +1,4 @@
 class ItemsController < ApplicationController
-  include ActionView::RecordIdentifier
   helper_method :todo_list, :item
 
   # POST /todolists/:todo_list_id/items
@@ -48,7 +47,6 @@ class ItemsController < ApplicationController
   # PATCH /todolists/:todo_list_id/items/:id/complete
   def complete
     @item = Todos::UpdateItemService.call(item:, completed: true)
-    broadcast_item_completed(@item)
     flash.now[:notice] = "Item completed successfully."
     set_items_frame_pagination
 
@@ -110,15 +108,6 @@ class ItemsController < ApplicationController
 
   def set_items_frame_pagination
     @pagy, @items = pagy(:offset, todo_list.items.order(id: :desc), limit: 10, page: params[:page] || 1)
-  end
-
-  def broadcast_item_completed(item)
-    Turbo::StreamsChannel.broadcast_replace_to(
-      todo_list,
-      target: dom_id(item),
-      partial: "items/item",
-      locals: { item: item }
-    )
   end
 end
 

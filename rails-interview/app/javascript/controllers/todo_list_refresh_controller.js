@@ -28,9 +28,12 @@ export default class extends Controller {
 
   refreshItemsFrame() {
     const frame = document.getElementById(this.frameIdValue)
-    if (frame) {
-      const url = window.location.pathname + window.location.search
-      frame.src = url
-    }
+    if (!frame) return
+
+    const page = frame.dataset.currentPage || "1"
+    const searchParams = new URLSearchParams(window.location.search)
+    searchParams.set("page", page)
+    const url = window.location.pathname + "?" + searchParams.toString()
+    frame.src = url
   }
 }

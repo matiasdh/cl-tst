@@ -1,5 +1,6 @@
 module Todos
   class UpdateItemService < ApplicationService
+    include ActionView::RecordIdentifier
     include PushSyncable
 
     def initialize(item:, description: nil, completed: nil)
@@ -14,6 +15,7 @@ module Todos
         @item.todo_list.increment!(:pending_sync_items_count)
         enqueue_push_sync(@item, :update)
       end
+      broadcast_item_completed if just_completed?
       @item
     end
 
@@ -21,6 +23,19 @@ module Todos
 
     def item_attrs
       { description: @description, completed: @completed }.compact
+    end
+
+    def just_completed?
+      @completed == true && @item.completed?
+    end
+
+    def broadcast_item_completed
+      Turbo::StreamsChannel.broadcast_replace_to(
+        @item.todo_list,
+        target: dom_id(@item),
+        partial: "items/item",
+        locals: { item: @item }
+      )
     end
   end
 end

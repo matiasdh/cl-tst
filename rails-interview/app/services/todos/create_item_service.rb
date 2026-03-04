@@ -9,7 +9,14 @@ module Todos
     def call
       item = @todo_list.items.create!(description: @description, completed: @completed)
       # API does not support creating items in existing lists
+      broadcast_refresh_items
       item
+    end
+
+    private
+
+    def broadcast_refresh_items
+      ActionCable.server.broadcast("todo_list_#{@todo_list.id}", { action: "refresh_items" })
     end
   end
 end
