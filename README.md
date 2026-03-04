@@ -10,17 +10,23 @@ This repo contains two projects: the **external API** (`rails-interview-api`) an
 
 From the repo root:
 
-1. **Install dependencies** in both projects (checks that current Ruby matches `.ruby-version`):
+1. **Copy environment files** (required before running any `just` commands):
+   ```bash
+   cp rails-interview/.env.sample rails-interview/.env
+   cp rails-interview-api/.env.sample rails-interview-api/.env
+   ```
+
+2. **Install dependencies** in both projects (checks that current Ruby matches `.ruby-version`):
    ```bash
    just setup
    ```
 
-2. **Create and migrate both databases** (drops existing DBs if present, then creates and migrates):
+3. **Create and migrate both databases** (drops existing DBs if present, then creates and migrates):
    ```bash
    just db
    ```
 
-3. **(Optional)** Load sample data:
+4. **(Optional)** Load sample data:
    ```bash
    just seeds
    ```

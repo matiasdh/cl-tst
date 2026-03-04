@@ -12,6 +12,15 @@ Design decisions, trade-offs, and assumptions for the Todo API and sync layer.
 - **Push sync (Local → External)**: Domain services and some jobs enqueue `ExternalTodoApi::PushSyncJob` when lists or items change. The job delegates to `PushSyncService`, which uses `PushSync::TodoListHandler` and `PushSync::ItemHandler` to translate create/update/delete operations into concrete HTTP calls.
 - **Pull sync (External → Local)**: A two-phase flow (`PullSyncFetchJob` + `PullSyncProcessJob`) fetches all lists and items with `GET /todolists`, stores the raw payload in cache and then `PullSyncService` performs batched upserts into the local database, respecting unsynced local changes.
 
+### Scheduled jobs (Sidekiq Cron)
+
+Two cron jobs are defined in `config/sidekiq_cron.yml` and run on the `external_sync` queue:
+
+| Job | Schedule | What it does |
+|-----|----------|--------------|
+| **Pull sync** (`ExternalTodoApi::PullSyncFetchJob`) | Every **15 minutes** (`*/15 * * * *`) | Fetches all todo lists and items from the external API with `GET /todolists`, stores the raw payload in cache (15 min TTL), then enqueues `PullSyncProcessJob`. The process job runs `PullSyncService` to upsert lists and items into the local database, overwriting only records that are already `synced` (no pending local changes). |
+| **Resync new items** (`ExternalTodoApi::ResyncNewItemsJob`) | Every **hour** (`0 * * * *`) | Finds todo lists that have an `external_id` (already pushed) but contain items without `external_id` (items created locally after the initial push). For each such list, deletes the list on the external API and recreates it with `POST /todolists` including all current items, so that new local items receive `external_id` and `external_source_id`. See [ResyncNewItemsJob: Destroy & Recreate for new items](#8-resyncnewitemsjob-destroy--recreate-for-new-items) for rationale and trade-offs. |
+
 ---
 
 ## Key Design Decisions
@@ -141,10 +150,10 @@ Together, retries plus structured logging make the sync layer resilient and diag
 ### Desired changes in the External API for better integration
 
 - **Filter by update date**: Support query parameters (e.g. `updated_after`, `updated_before`) on `GET /todolists` (and on items) so clients can pull only lists or items modified since a given time, reducing payload size and making incremental sync simpler.
-- **Create items in an existing list**: Expose `POST /todolists/{todolistId}/todoitems` so new items can be created directly under a list instead of relying on the destroy-and-recreate resync workaround (see §8 above).
+- **Create items in an existing list**: Expose `POST /todolists/{todolistId}/todoitems` so new items can be created directly under a list instead of relying on the destroy-and-recreate resync workaround (see [ResyncNewItemsJob: Destroy & Recreate for new items](#8-resyncnewitemsjob-destroy--recreate-for-new-items)).
 - **Webhooks for changes**: When a todo list or item is created, updated, or deleted on the External API, send a webhook notification to a configurable URL (e.g. with event type, resource id, and timestamp). That would allow this app to react to external changes in real time instead of (or in addition to) polling.
 - **Pagination**: Support cursor- or page-based pagination on `GET /todolists` (and on items per list) so clients can fetch in chunks instead of a single large response, improving reliability and memory use at scale.
-- **Client reference id on create**: Echo back an optional `client_reference_id` in create responses so clients can match local records to remote ones without relying on response order (see §8 item matching).
+- **Client reference id on create**: Echo back an optional `client_reference_id` in create responses so clients can match local records to remote ones without relying on response order (see *Item matching after recreate* under [ResyncNewItemsJob: Destroy & Recreate for new items](#8-resyncnewitemsjob-destroy--recreate-for-new-items)).
 
 ---
 
@@ -169,28 +178,28 @@ Together, retries plus structured logging make the sync layer resilient and diag
 
 The Todo List show view updates the list of items in real time when items are added or marked completed, so that all clients viewing the same list see changes without reloading. Counts (completed/pending/total) are not shown on the show view and are not updated in real time.
 
-### Escenario “un ítem” (single item complete)
+### Scenario: single item complete
 
 When a user marks one item as completed (button “Complete” on a row):
 
 - The client that clicked receives the usual Turbo Stream response and the items frame is updated (that row shows as completed).
 - The server also broadcasts a Turbo Stream `replace` for that item to the todo list’s stream (`Turbo::StreamsChannel.broadcast_replace_to(todo_list, ...)`). Every browser that has the list open and is subscribed via `turbo_stream_from todo_list` receives this broadcast. If the completed item is on the current page, its row updates to the completed state; if not, only the summary (if present) would change — in this app the summary is removed, so only the item row updates when it is in view.
 
-### Escenario “nuevo ítem” (add item)
+### Scenario: add item
 
 When a user adds a new item (`CreateItemService`):
 
 - The client that submitted the form receives the Turbo Stream response and the items frame is updated.
 - The service broadcasts `{ action: "refresh_items" }` on the todo list’s Action Cable channel, so every other client subscribed to that list refreshes the items frame (same mechanism as bulk below) and sees the new item if they are on page 1.
 
-### Escenario “bulk” (complete selected / complete all)
+### Scenario: bulk (complete selected / complete all)
 
 When the user completes multiple items (“Complete selected” or “Complete all”):
 
 - The request is handled synchronously and the job `ItemsBulkUpdateJob` runs. It marks the items completed and then broadcasts a message `{ action: "refresh_items" }` on the Action Cable channel `todo_list_<id>` (no Turbo Stream replace of the whole frame, to avoid forcing page 1 for everyone).
 - Each client that has the list open is subscribed to `TodoListChannel` for that list (via a Stimulus controller). On receiving `refresh_items`, the client refreshes only the items frame: it sets the frame’s `src` to the current page URL (including `?page=...`). Turbo fetches that URL and replaces the frame with the matching fragment from the response, so each user sees their current page updated with the new completed state.
 
-### Escalar (WebSockets)
+### Scaling (WebSockets)
 
 The implementation uses Rails’ built-in Action Cable (with Redis adapter in development/production). For higher scale (many concurrent WebSocket connections), [AnyCable](https://anycable.io/) can be used as a drop-in replacement: it is compatible with the Action Cable API, so the same channels and broadcasts work; you run an AnyCable server and point the client to it instead of the default `/cable` endpoint.
 
@@ -220,10 +229,14 @@ The implementation uses Rails’ built-in Action Cable (with Redis adapter in de
     - `source_id`: identifier for this local system, sent when creating remote lists/items.
     - `timeout`: HTTP request timeout (seconds).
     - `retries`: maximum number of retries for idempotent requests.
+- **Initial seed and sync**:
+  - `db/seeds.rb` creates local todo lists and items (no `external_id`). It then pushes each new list to the external API with `PushSyncJob.perform_now('TodoList', id, 'create')`, and enqueues `PullSyncFetchJob.perform_later` and `ResyncNewItemsJob.perform_later` so that an initial pull and resync run early (e.g. after `rails db:seed`), bringing data in and assigning external IDs to items. Run Sidekiq so these jobs are processed.
 - **Running Pull Sync manually**:
   - From a Rails console, enqueue `ExternalTodoApi::PullSyncFetchJob.perform_later`. This will perform a single `GET /todolists`, store the payload in cache and enqueue `PullSyncProcessJob`, which calls `PullSyncService` to upsert lists and items in batches.
 - **Running Push Sync manually**:
   - Any operation that goes through the `Todos::*` services (creating/updating/deleting syncable lists or items) will automatically enqueue `ExternalTodoApi::PushSyncJob`.
   - Alternatively, you can enqueue jobs directly, e.g. `ExternalTodoApi::PushSyncJob.perform_later("TodoList", some_id, "update")`.
+- **Scheduled jobs (cron)**:
+  - Schedules are in `config/sidekiq_cron.yml`: pull sync every 15 minutes, resync new items every hour. Sidekiq-Cron must be loaded (see `config/initializers/sidekiq.rb`) and Sidekiq must be running for these to run on schedule.
 - **Processing job queues**:
   - Run Sidekiq (or the configured job backend) ensuring that the `external_sync` queue is processed in addition to the default queues.
