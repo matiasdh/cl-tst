@@ -89,3 +89,9 @@ If jobs fail (e.g. connection refused to 3001), check the Sidekiq log or Rails l
 The **notes** to submit are in the Rails interview project:
 
 - **File:** [rails-interview/NOTES.md](rails-interview/NOTES.md)
+
+---
+
+## Full history
+
+If you want to see the complete git history of both projects (`rails-interview-api` and `rails-interview`), they can be provided as separate repositories.
