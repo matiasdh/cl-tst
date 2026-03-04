@@ -21,6 +21,10 @@ export default class extends Controller {
     this.updateState()
   }
 
+  resetSelection() {
+    this.updateState()
+  }
+
   syncSelection() {
     if (!this.hasFormTarget) return
 
