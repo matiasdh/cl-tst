@@ -1,6 +1,4 @@
 class ItemsBulkUpdateJob < ApplicationJob
-  include ActionView::RecordIdentifier
-  include Pagy::Method
   queue_as :default
 
   def perform(todo_list_id, task_id, item_ids: [], all: false)
@@ -16,7 +14,7 @@ class ItemsBulkUpdateJob < ApplicationJob
       enqueue_push_sync(syncable_item_ids)
     end
 
-    broadcast_refresh
+    broadcast_refresh_items
     notify_client(task_id)
   end
 
@@ -36,18 +34,7 @@ class ItemsBulkUpdateJob < ApplicationJob
     ActionCable.server.broadcast("bulk_update_#{task_id}", { status: "completed" })
   end
 
-  def broadcast_refresh
-    @todo_list.reload
-
-    pagy_request = { base_url: "", path: "/todolists/#{@todo_list.id}", params: { "page" => 1 } }
-    pagy_obj, items = pagy(:offset, @todo_list.items.order(id: :desc), limit: 10, page: 1, request: pagy_request)
-
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @todo_list,
-      target: dom_id(@todo_list, :items),
-      partial: "todo_lists/items_frame",
-      locals: { todo_list: @todo_list, items: items, pagy: pagy_obj }
-    )
-
+  def broadcast_refresh_items
+    ActionCable.server.broadcast("todo_list_#{@todo_list.id}", { action: "refresh_items" })
   end
 end

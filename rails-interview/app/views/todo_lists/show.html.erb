@@ -43,7 +43,10 @@
     <% end %>
   </div>
 
-  <div class="bg-white shadow-sm p-4 border border-slate-200 rounded-xl" data-controller="items-selection">
+  <div class="bg-white shadow-sm p-4 border border-slate-200 rounded-xl"
+       data-controller="items-selection todo-list-refresh"
+       data-todo-list-refresh-todo-list-id-value="<%= todo_list.id %>"
+       data-todo-list-refresh-frame-id-value="<%= dom_id(todo_list, :items) %>">
     <%= form_with url: complete_selected_todo_list_items_path(todo_list),
                   method: :patch,
                   data: { turbo_frame: dom_id(todo_list, :items), items_selection_target: "form" } do |f| %>
