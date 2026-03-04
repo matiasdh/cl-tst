@@ -88,4 +88,4 @@ If jobs fail (e.g. connection refused to 3001), check the Sidekiq log or Rails l
 
 The **notes** to submit are in the Rails interview project:
 
-- **File:** `rails-interview/NOTES.md`
+- **File:** [rails-interview/NOTES.md](rails-interview/NOTES.md)
