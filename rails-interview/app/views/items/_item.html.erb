@@ -1,5 +1,7 @@
 <% completed = item.completed %>
 <% editing = local_assigns.fetch(:edit_mode, false) %>
+<% current_page = local_assigns.fetch(:current_page, 1) %>
+<% item_path_options = current_page && current_page > 1 ? { page: current_page } : {} %>
 
 <%= turbo_frame_tag dom_id(item), data: { controller: 'item-edit' } do %>
     <div data-item-edit-target="display"
@@ -31,7 +33,7 @@
 
         <% unless completed %>
           <%= link_to "Complete",
-                      complete_todo_list_item_path(item.todo_list, item),
+                      complete_todo_list_item_path(item.todo_list, item, item_path_options),
                       data: {
                         turbo_method: :patch,
                         turbo_frame: dom_id(item.todo_list, :items)
@@ -40,7 +42,7 @@
         <% end %>
 
         <%= link_to "Delete",
-                    todo_list_item_path(item.todo_list, item),
+                    todo_list_item_path(item.todo_list, item, item_path_options),
                     data: {
                       turbo_method: :delete,
                       turbo_confirm: "Are you sure?",

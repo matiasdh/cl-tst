@@ -2,11 +2,12 @@
   items_to_show = local_assigns[:items]
   pagy_obj = local_assigns[:pagy]
   items_to_show ||= todo_list.items.order(id: :desc)
+  current_page = pagy_obj&.page || 1
 %>
-<%= turbo_frame_tag dom_id(todo_list, :items), data: { action: "turbo:frame-load->items-selection#resetSelection" } do %>
+<%= turbo_frame_tag dom_id(todo_list, :items), data: { action: "turbo:frame-load->items-selection#resetSelection", current_page: current_page } do %>
   <div class="flex flex-col space-y-4" data-items-selection-target="list">
     <% items_to_show.each do |item| %>
-      <%= render "items/item", item: %>
+      <%= render "items/item", item:, current_page: current_page %>
     <% end %>
   </div>
   <% if pagy_obj %>
