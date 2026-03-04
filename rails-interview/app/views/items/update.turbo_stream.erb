@@ -5,9 +5,3 @@
   <%= render 'items/item', item: %>
 <% end %>
 
-<%= turbo_stream.replace dom_id(todo_list, :summary) do %>
-  <%= turbo_frame_tag dom_id(todo_list, :summary) do %>
-    <%= render 'todo_lists/summary', todo_list: %>
-  <% end %>
-<% end %>
-

@@ -49,11 +49,5 @@ class ItemsBulkUpdateJob < ApplicationJob
       locals: { todo_list: @todo_list, items: items, pagy: pagy_obj }
     )
 
-    Turbo::StreamsChannel.broadcast_replace_to(
-      @todo_list,
-      target: dom_id(@todo_list, :summary),
-      partial: "todo_lists/summary",
-      locals: { todo_list: @todo_list }
-    )
   end
 end
