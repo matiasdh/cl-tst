@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  include Pagy::Method
   include Rescuable
   rescue_from ActionController::UnknownFormat, with: :raise_not_found
 

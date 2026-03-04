@@ -1,5 +1,6 @@
 class ItemsBulkUpdateJob < ApplicationJob
   include ActionView::RecordIdentifier
+  include Pagy::Method
   queue_as :default
 
   def perform(todo_list_id, task_id, item_ids: [], all: false)
@@ -38,11 +39,14 @@ class ItemsBulkUpdateJob < ApplicationJob
   def broadcast_refresh
     @todo_list.reload
 
+    pagy_request = { base_url: "", path: "/todolists/#{@todo_list.id}", params: { "page" => 1 } }
+    pagy_obj, items = pagy(:offset, @todo_list.items.order(id: :desc), limit: 10, page: 1, request: pagy_request)
+
     Turbo::StreamsChannel.broadcast_replace_to(
       @todo_list,
       target: dom_id(@todo_list, :items),
       partial: "todo_lists/items_frame",
-      locals: { todo_list: @todo_list }
+      locals: { todo_list: @todo_list, items: items, pagy: pagy_obj }
     )
 
     Turbo::StreamsChannel.broadcast_replace_to(

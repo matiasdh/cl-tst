@@ -2,9 +2,9 @@
               url: todo_list_item_path(item.todo_list, item),
               data: { turbo_frame: dom_id(item) },
               class: 'flex h-full w-full flex-nowrap items-center gap-3' do |form| %>
-  <div class="flex-shrink-0">
+  <div class="flex flex-shrink-0 items-center">
     <%= form.check_box :completed,
-                       class: 'h-4 w-4 rounded border-slate-300 text-sky-600' %>
+                       class: 'h-4 w-4 cursor-pointer rounded border-slate-300 text-sky-600' %>
   </div>
 
   <div class="flex flex-1 min-w-0 items-center gap-2">
@@ -19,10 +19,10 @@
 
   <div class="flex flex-shrink-0 items-center gap-2">
     <%= form.submit 'Update',
-                    class: 'inline-flex items-center rounded-md bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700' %>
+                    class: 'inline-flex items-center cursor-pointer rounded-md bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700' %>
     <button type="button"
             data-action="click->item-edit#showDisplay"
-            class="inline-flex items-center rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+            class="inline-flex items-center cursor-pointer rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
       Cancel
     </button>
   </div>

@@ -31,7 +31,7 @@
     </h2>
 
     <%= form_with model: [todo_list, Item.new],
-                  url: todo_list_items_path(todo_list),
+                  url: todo_list_items_path(todo_list, page: params[:page]),
                   class: "flex flex-col gap-2 sm:flex-row sm:items-center",
                   data: { turbo_frame: dom_id(todo_list, :items) } do |form| %>
       <div class="flex-1">
@@ -49,7 +49,8 @@
   <div class="bg-white shadow-sm p-4 border border-slate-200 rounded-xl" data-controller="items-selection">
     <%= form_with url: complete_selected_todo_list_items_path(todo_list),
                   method: :patch,
-                  data: { turbo_frame: dom_id(todo_list, :items), items_selection_target: "form" } do %>
+                  data: { turbo_frame: dom_id(todo_list, :items), items_selection_target: "form" } do |f| %>
+      <%= hidden_field_tag :page, params[:page] if params[:page].present? %>
       <div class="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3">
         <h2 class="font-semibold text-slate-900 text-sm">
           Items
@@ -58,7 +59,7 @@
         <div class="flex flex-wrap items-center gap-3 text-sm">
           <label class="inline-flex items-center gap-2 text-slate-700">
             <input type="checkbox"
-                   class="border-slate-300 rounded w-4 h-4 text-sky-600"
+                   class="cursor-pointer border-slate-300 rounded w-4 h-4 text-sky-600"
                    data-items-selection-target="selectAll"
                    data-action="items-selection#toggleAll">
             <span>Select all</span>
@@ -67,12 +68,12 @@
           <div class="flex gap-2">
             <button type="submit"
                     data-items-selection-target="completeSelectedButton"
-                    class="inline-flex items-center bg-sky-600 disabled:opacity-50 px-3 py-1.5 rounded-lg font-medium text-white text-xs">
+                    class="inline-flex items-center cursor-pointer bg-sky-600 disabled:opacity-50 px-3 py-1.5 rounded-lg font-medium text-white text-xs hover:bg-sky-700 disabled:cursor-not-allowed">
               Complete selected
             </button>
 
             <%= link_to "Complete all",
-                        complete_all_todo_list_items_path(todo_list),
+                        complete_all_todo_list_items_path(todo_list, page: params[:page]),
                         data: {
                           turbo_method: :patch,
                           turbo_frame: dom_id(todo_list, :items)
@@ -83,7 +84,7 @@
       </div>
 
       <div class="mt-4">
-        <%= render "items_frame", todo_list: todo_list %>
+        <%= render "items_frame", todo_list: todo_list, items: @items, pagy: @pagy %>
       </div>
     <% end %>
   </div>

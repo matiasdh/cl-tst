@@ -4,11 +4,11 @@
 <%= turbo_frame_tag dom_id(item), data: { controller: 'item-edit' } do %>
     <div data-item-edit-target="display"
         class="flex min-h-12 h-12 flex-nowrap items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm <%= 'hidden' if editing %>">
-      <div class="flex-shrink-0">
+      <div class="flex flex-shrink-0 items-center">
         <%= check_box_tag "item_ids[]",
                           item.id,
                           false,
-                          class: "h-4 w-4 rounded border-slate-300 text-sky-600",
+                          class: "h-4 w-4 cursor-pointer rounded border-slate-300 text-sky-600",
                           disabled: completed,
                           data: {
                             items_selection_target: "checkbox",
@@ -16,7 +16,7 @@
                           } %>
       </div>
 
-      <div class="flex-1 min-w-0">
+      <div class="flex flex-1 min-w-0 items-center">
         <p class="text-sm truncate <%= completed ? "line-through text-slate-400" : "text-slate-900" %>" title="<%= item.description %>">
           <%= item.description %>
         </p>
@@ -25,7 +25,7 @@
       <div class="flex flex-shrink-0 items-center gap-2">
         <button type="button"
                 data-action="click->item-edit#showForm"
-                class="inline-flex items-center hover:bg-slate-50 px-2 py-1 border border-slate-200 rounded-md font-medium text-slate-700 text-xs">
+                class="inline-flex items-center cursor-pointer hover:bg-slate-50 px-2 py-1 border border-slate-200 rounded-md font-medium text-slate-700 text-xs">
           Edit
         </button>
 

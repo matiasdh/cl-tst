@@ -9,6 +9,7 @@ class ItemsController < ApplicationController
       completed: item_params[:completed]
     )
     flash.now[:notice] = "Item created successfully."
+    set_items_frame_pagination
 
     respond_to do |format|
       format.html { redirect_to todo_list, notice: flash.now[:notice] }
@@ -35,6 +36,7 @@ class ItemsController < ApplicationController
   def destroy
     Todos::DestroyItemService.call(item:)
     flash.now[:notice] = "Item deleted successfully."
+    set_items_frame_pagination
 
     respond_to do |format|
       format.html { redirect_to todo_list, notice: flash.now[:notice] }
@@ -46,6 +48,7 @@ class ItemsController < ApplicationController
   def complete
     @item = Todos::UpdateItemService.call(item:, completed: true)
     flash.now[:notice] = "Item completed successfully."
+    set_items_frame_pagination
 
     respond_to do |format|
       format.html { redirect_to todo_list, notice: flash.now[:notice] }
@@ -80,7 +83,7 @@ class ItemsController < ApplicationController
   end
 
   def bulk_update_params
-    params.permit(item_ids: [])
+    params.permit(:page, item_ids: [])
   end
 
   def perform_bulk_update(item_ids:, all:)
@@ -95,11 +98,16 @@ class ItemsController < ApplicationController
 
     todo_list.reload
     flash.now[:notice] = "Items completed successfully."
+    set_items_frame_pagination
 
     respond_to do |format|
       format.html { redirect_to todo_list, notice: flash.now[:notice] }
       format.turbo_stream
     end
+  end
+
+  def set_items_frame_pagination
+    @pagy, @items = pagy(:offset, todo_list.items.order(id: :desc), limit: 10, page: params[:page] || 1)
   end
 end
 

@@ -50,6 +50,7 @@ gem "faraday-retry"
 gem "activerecord-import"
 
 gem "tailwindcss-rails", "~> 4.4"
+gem "pagy", "~> 43.2"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"

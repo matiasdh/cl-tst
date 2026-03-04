@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+/* Pagy nav: same style as app buttons (Back to lists / Add / Complete all) */
+@layer components {
+  .pagy.series-nav {
+    @apply flex flex-wrap items-center gap-1.5 justify-end;
+  }
+
+  /* Page links — same as "Back to lists" / "Complete all" */
+  .pagy.series-nav a[href] {
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 no-underline
+           hover:bg-slate-50
+           focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500
+           transition-colors;
+  }
+
+  /* Disabled prev/next */
+  .pagy.series-nav a[role="link"][aria-disabled="true"]:not([aria-current="page"]) {
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-400 no-underline cursor-not-allowed pointer-events-none
+           hover:bg-slate-100 hover:text-slate-400 hover:border-slate-200;
+  }
+
+  /* Current page — same as "Add" / "Complete selected" (primary) */
+  .pagy.series-nav a[aria-current="page"] {
+    @apply inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white no-underline cursor-default
+           hover:bg-sky-700;
+  }
+
+  .pagy.series-nav a[role="separator"] {
+    @apply px-2 py-1.5 text-slate-400 cursor-default border-0 bg-transparent
+           hover:bg-transparent hover:text-slate-400;
+  }
+}

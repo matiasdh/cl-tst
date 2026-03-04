@@ -8,6 +8,7 @@ class TodoListsController < ApplicationController
 
   # GET /todolists/:id
   def show
+    @pagy, @items = pagy(:offset, todo_list.items.order(id: :desc), limit: 10)
   end
 
   # GET /todolists/new
