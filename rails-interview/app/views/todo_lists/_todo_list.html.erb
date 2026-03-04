@@ -1,0 +1,32 @@
+<% items = todo_list.items %>
+<% completed_count = items.count(&:completed) %>
+<% pending_count = items.size - completed_count %>
+
+<%= link_to todo_list_path(todo_list),
+            class: "block rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md" do %>
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+        Todo list
+      </p>
+      <p class="mt-1 text-base font-semibold text-slate-900">
+        <%= todo_list.name %>
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-2 text-xs">
+      <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
+        <span class="mr-1 h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+        Completed <%= completed_count %>
+      </span>
+      <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">
+        <span class="mr-1 h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+        Pending <%= pending_count %>
+      </span>
+      <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
+        Total <%= items.size %>
+      </span>
+    </div>
+  </div>
+<% end %>
+

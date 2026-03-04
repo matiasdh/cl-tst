@@ -1,0 +1,22 @@
+<div class="space-y-4">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
+      Todo lists
+    </h1>
+    <p class="mt-1 text-sm text-slate-600">
+      View your lists and open one to manage its items.
+    </p>
+  </div>
+
+  <% if @todo_lists.any? %>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <% @todo_lists.each do |todo_list| %>
+        <%= render "todo_list", todo_list: %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-slate-600">
+      No todo lists yet. Use “Add list” in the header to create your first one.
+    </p>
+  <% end %>
+</div>

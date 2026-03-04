@@ -1,0 +1,8 @@
+<div data-controller="toast" class="<%= toast_class(type) %> pointer-events-auto translate-x-full transition-transform duration-300 ease-out flex items-center justify-between gap-3" role="alert">
+  <span class="flex-1 min-w-0"><%= message %></span>
+  <button type="button" data-action="click->toast#dismiss" class="shrink-0 p-1 rounded hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400 cursor-pointer" aria-label="Close notification">
+    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
+</div>

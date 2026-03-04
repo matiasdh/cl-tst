@@ -1,0 +1,58 @@
+<% completed = item.completed %>
+<% editing = local_assigns.fetch(:edit_mode, false) %>
+
+<%= turbo_frame_tag dom_id(item), data: { controller: 'item-edit' } do %>
+    <div data-item-edit-target="display"
+        class="flex min-h-12 h-12 flex-nowrap items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm <%= 'hidden' if editing %>">
+      <div class="flex-shrink-0">
+        <%= check_box_tag "item_ids[]",
+                          item.id,
+                          false,
+                          class: "h-4 w-4 rounded border-slate-300 text-sky-600",
+                          disabled: completed,
+                          data: {
+                            items_selection_target: "checkbox",
+                            action: "items-selection#checkboxChanged"
+                          } %>
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <p class="text-sm truncate <%= completed ? "line-through text-slate-400" : "text-slate-900" %>" title="<%= item.description %>">
+          <%= item.description %>
+        </p>
+      </div>
+
+      <div class="flex flex-shrink-0 items-center gap-2">
+        <button type="button"
+                data-action="click->item-edit#showForm"
+                class="inline-flex items-center hover:bg-slate-50 px-2 py-1 border border-slate-200 rounded-md font-medium text-slate-700 text-xs">
+          Edit
+        </button>
+
+        <% unless completed %>
+          <%= link_to "Complete",
+                      complete_todo_list_item_path(item.todo_list, item),
+                      data: {
+                        turbo_method: :patch,
+                        turbo_frame: dom_id(item.todo_list, :items)
+                      },
+                      class: "inline-flex items-center rounded-md bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700" %>
+        <% end %>
+
+        <%= link_to "Delete",
+                    todo_list_item_path(item.todo_list, item),
+                    data: {
+                      turbo_method: :delete,
+                      turbo_confirm: "Are you sure?",
+                      turbo_frame: dom_id(item.todo_list, :items)
+                    },
+                    class: "inline-flex items-center rounded-md border border-rose-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50" %>
+      </div>
+    </div>
+
+    <div data-item-edit-target="form"
+        data-item-edit-initial-visible="<%= editing %>"
+        class="flex min-h-12 h-12 flex-nowrap items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm <%= 'hidden' unless editing %>">
+      <%= render 'items/item_edit_form', item: %>
+    </div>
+<% end %>

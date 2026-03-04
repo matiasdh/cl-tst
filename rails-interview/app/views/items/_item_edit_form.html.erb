@@ -1,0 +1,29 @@
+<%= form_with model: [item.todo_list, item],
+              url: todo_list_item_path(item.todo_list, item),
+              data: { turbo_frame: dom_id(item) },
+              class: 'flex h-full w-full flex-nowrap items-center gap-3' do |form| %>
+  <div class="flex-shrink-0">
+    <%= form.check_box :completed,
+                       class: 'h-4 w-4 rounded border-slate-300 text-sky-600' %>
+  </div>
+
+  <div class="flex flex-1 min-w-0 items-center gap-2">
+    <%= form.text_field :description,
+                        class: 'w-full min-w-0 h-8 rounded border border-slate-300 px-2 py-1 text-sm leading-5 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500',
+                        placeholder: 'Description',
+                        title: item.errors[:description].any? ? item.errors[:description].first : nil %>
+    <% if item.errors[:description].any? %>
+      <span id="item-<%= item.id %>-error" class="flex-shrink-0 truncate max-w-[8rem] text-xs text-rose-600" title="<%= item.errors[:description].first %>"><%= item.errors[:description].first %></span>
+    <% end %>
+  </div>
+
+  <div class="flex flex-shrink-0 items-center gap-2">
+    <%= form.submit 'Update',
+                    class: 'inline-flex items-center rounded-md bg-sky-600 px-2 py-1 text-xs font-medium text-white hover:bg-sky-700' %>
+    <button type="button"
+            data-action="click->item-edit#showDisplay"
+            class="inline-flex items-center rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+      Cancel
+    </button>
+  </div>
+<% end %>

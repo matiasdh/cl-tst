@@ -1,0 +1,4 @@
+<% flash.each do |type, message| %>
+  <% next if message.blank? %>
+  <%= turbo_stream.append "toast-container", partial: "layouts/toast", locals: { type: type, message: message } %>
+<% end %>

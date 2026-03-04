@@ -1,0 +1,20 @@
+<%= form_with model: todo_list,
+              class: "space-y-4 max-w-md" do |form| %>
+  <div>
+    <%= form.label :name,
+                   "Name",
+                   class: "block text-sm font-medium text-slate-700" %>
+    <div class="mt-1">
+      <%= form.text_field :name,
+                          class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" %>
+    </div>
+  </div>
+
+  <div class="flex gap-2">
+    <%= form.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-sky-700" %>
+    <%= link_to "Cancel",
+                todo_list.persisted? ? todo_list_path(todo_list) : todo_lists_path,
+                class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+  </div>
+<% end %>
+

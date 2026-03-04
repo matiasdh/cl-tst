@@ -1,0 +1,15 @@
+default: &default
+  base_url: <%= ENV.fetch('EXTERNAL_TODO_API_URL', 'http://localhost:3001') %>
+  source_id: <%= ENV.fetch('EXTERNAL_TODO_API_SOURCE_ID', 'rails-interview') %>
+  timeout: <%= ENV.fetch('EXTERNAL_TODO_API_TIMEOUT', '10').to_i %>
+  retries: <%= ENV.fetch('EXTERNAL_TODO_API_RETRIES', '3').to_i %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  base_url: http://localhost:3001
+
+production:
+  <<: *default

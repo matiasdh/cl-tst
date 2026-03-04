@@ -1,0 +1,7 @@
+<%= turbo_frame_tag dom_id(todo_list, :items) do %>
+  <div class="flex flex-col space-y-4" data-items-selection-target="list">
+    <% todo_list.items.order(id: :desc).each do |item| %>
+      <%= render "items/item", item: %>
+    <% end %>
+  </div>
+<% end %>

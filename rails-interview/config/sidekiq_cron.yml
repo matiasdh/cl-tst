@@ -1,0 +1,11 @@
+pull_sync:
+  cron: '*/15 * * * *'
+  class: ExternalTodoApi::PullSyncFetchJob
+  queue: external_sync
+  active_job: true
+
+resync_new_items:
+  cron: '0 * * * *'
+  class: ExternalTodoApi::ResyncNewItemsJob
+  queue: external_sync
+  active_job: true

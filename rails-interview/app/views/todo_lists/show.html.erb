@@ -1,0 +1,90 @@
+<div class="space-y-6">
+  <div class="flex sm:flex-row flex-col justify-between sm:items-center gap-3">
+    <div>
+      <p class="font-medium text-slate-500 text-xs uppercase tracking-wide">
+        Todo list
+      </p>
+      <h1 class="mt-1 font-semibold text-slate-900 text-2xl">
+        <%= todo_list.name %>
+      </h1>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Back to lists",
+                  todo_lists_path,
+                  class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+      <%= button_to "Delete list",
+                    todo_list_path(todo_list),
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Are you sure?" } },
+                    class: "inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-100" %>
+    </div>
+  </div>
+
+  <%= turbo_frame_tag dom_id(todo_list, :summary) do %>
+    <%= render "summary", todo_list: todo_list %>
+  <% end %>
+
+  <div class="bg-white shadow-sm p-4 border border-slate-200 rounded-xl">
+    <h2 class="font-semibold text-slate-900 text-sm mb-2">
+      Add item
+    </h2>
+
+    <%= form_with model: [todo_list, Item.new],
+                  url: todo_list_items_path(todo_list),
+                  class: "flex flex-col gap-2 sm:flex-row sm:items-center",
+                  data: { turbo_frame: dom_id(todo_list, :items) } do |form| %>
+      <div class="flex-1">
+        <%= form.text_field :description,
+                            placeholder: "Describe the task…",
+                            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" %>
+      </div>
+      <div class="flex items-center gap-2">
+        <%= form.submit "Add",
+                        class: "inline-flex items-center rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-700" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-white shadow-sm p-4 border border-slate-200 rounded-xl" data-controller="items-selection">
+    <%= form_with url: complete_selected_todo_list_items_path(todo_list),
+                  method: :patch,
+                  data: { turbo_frame: dom_id(todo_list, :items), items_selection_target: "form" } do %>
+      <div class="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-3">
+        <h2 class="font-semibold text-slate-900 text-sm">
+          Items
+        </h2>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+          <label class="inline-flex items-center gap-2 text-slate-700">
+            <input type="checkbox"
+                   class="border-slate-300 rounded w-4 h-4 text-sky-600"
+                   data-items-selection-target="selectAll"
+                   data-action="items-selection#toggleAll">
+            <span>Select all</span>
+          </label>
+
+          <div class="flex gap-2">
+            <button type="submit"
+                    data-items-selection-target="completeSelectedButton"
+                    class="inline-flex items-center bg-sky-600 disabled:opacity-50 px-3 py-1.5 rounded-lg font-medium text-white text-xs">
+              Complete selected
+            </button>
+
+            <%= link_to "Complete all",
+                        complete_all_todo_list_items_path(todo_list),
+                        data: {
+                          turbo_method: :patch,
+                          turbo_frame: dom_id(todo_list, :items)
+                        },
+                        class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <%= render "items_frame", todo_list: todo_list %>
+      </div>
+    <% end %>
+  </div>
+</div>

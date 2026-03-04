@@ -1,0 +1,5 @@
+<% flash.each do |type, message| %>
+  <% if message.present? %>
+    <%= render "layouts/toast", type: type, message: message %>
+  <% end %>
+<% end %>
