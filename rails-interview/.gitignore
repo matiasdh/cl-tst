@@ -42,5 +42,8 @@ rails_interview_test
 # Internal planning docs
 /plans
 
+# Cursor IDE
+.cursor/
+
 /app/assets/builds/*
 !/app/assets/builds/.keep
