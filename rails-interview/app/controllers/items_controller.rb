@@ -89,20 +89,10 @@ class ItemsController < ApplicationController
     params.permit(:page, item_ids: [])
   end
 
-  # Uses perform_now intentionally: the Turbo Stream response needs the
-  # updated data synchronously. The job class is reusable for async paths.
   def perform_bulk_update(item_ids:, all:)
-    task_id = SecureRandom.uuid
+    Todos::BulkUpdateItemsService.call(todo_list:, item_ids:, all:)
 
-    ItemsBulkUpdateJob.perform_now(
-      todo_list.id,
-      task_id,
-      item_ids:,
-      all:
-    )
-
-    todo_list.reload
-    flash.now[:notice] = "Items completed successfully."
+    flash.now[:notice] = "Items are being updated…"
     set_items_frame_pagination
 
     respond_to do |format|

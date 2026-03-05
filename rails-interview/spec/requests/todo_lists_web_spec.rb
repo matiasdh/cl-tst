@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Todo lists web UI", type: :request do
+  include ActiveJob::TestHelper
+
   describe "GET /todolists" do
     it "renders the list of todo lists" do
       todo_list = create(:todo_list)
@@ -43,8 +45,10 @@ RSpec.describe "Todo lists web UI", type: :request do
       item_2 = create(:item, todo_list:)
       create(:item, todo_list:)
 
-      patch "/todolists/#{todo_list.id}/items/complete_selected",
-            params: { item_ids: [ item_1.id, item_2.id ] }
+      perform_enqueued_jobs do
+        patch "/todolists/#{todo_list.id}/items/complete_selected",
+              params: { item_ids: [ item_1.id, item_2.id ] }
+      end
 
       expect(response).to redirect_to todo_list
       expect(item_1.reload.completed).to be true
@@ -58,7 +62,9 @@ RSpec.describe "Todo lists web UI", type: :request do
       item_1 = create(:item, todo_list:)
       item_2 = create(:item, todo_list:)
 
-      patch "/todolists/#{todo_list.id}/items/complete_all"
+      perform_enqueued_jobs do
+        patch "/todolists/#{todo_list.id}/items/complete_all"
+      end
 
       expect(response).to redirect_to todo_list
       expect(item_1.reload.completed).to be true
@@ -66,4 +72,3 @@ RSpec.describe "Todo lists web UI", type: :request do
     end
   end
 end
-
