@@ -4,7 +4,7 @@ This repo contains two projects: the **external API** (`rails-interview-api`) an
 
 ## Setup and run
 
-**Prerequisites:** [just](https://github.com/casey/just) (`brew install just` on macOS), [foreman](https://github.com/ddollar/foreman) for `just start` (`gem install foreman`), Docker (for Redis), and **Ruby** — use the version in `rails-interview-api/.ruby-version` (e.g. via rbenv, rvm, or asdf). **Redis** is used by Sidekiq and by Rails cache in development; start it with `just redis-up`.
+**Prerequisites:** [just](https://github.com/casey/just) (`brew install just` on macOS), [foreman](https://github.com/ddollar/foreman) for `just start` (`gem install foreman`), **Docker** and **Docker Compose** (Redis runs in Docker — no need to install Redis separately), and **Ruby** — use the version in `.ruby-version` (at the repo root) (e.g. via rbenv, rvm, or asdf). Start Redis with `just redis-up` when needed (Sidekiq and Rails cache use it in development).
 
 ### 1. One-time setup
 
