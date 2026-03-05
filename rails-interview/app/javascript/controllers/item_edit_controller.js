@@ -15,17 +15,11 @@ export default class extends Controller {
 
   showForm() {
     this.displayTarget.classList.add('hidden')
-    this.displayTarget.style.display = 'none'
-
     this.formTarget.classList.remove('hidden')
-    this.formTarget.style.display = ''
   }
 
   showDisplay() {
     this.formTarget.classList.add('hidden')
-    this.formTarget.style.display = 'none'
-
     this.displayTarget.classList.remove('hidden')
-    this.displayTarget.style.display = ''
   }
 }

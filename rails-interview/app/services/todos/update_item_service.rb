@@ -26,7 +26,7 @@ module Todos
     end
 
     def just_completed?
-      @completed == true && @item.completed?
+      @item.saved_change_to_completed? && @item.completed?
     end
 
     def broadcast_item_completed

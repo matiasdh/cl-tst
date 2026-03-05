@@ -9,6 +9,7 @@ class ItemsController < ApplicationController
       completed: item_params[:completed]
     )
     flash.now[:notice] = "Item created successfully."
+    todo_list.reload
     set_items_frame_pagination
 
     respond_to do |format|
@@ -36,6 +37,7 @@ class ItemsController < ApplicationController
   def destroy
     Todos::DestroyItemService.call(item:)
     flash.now[:notice] = "Item deleted successfully."
+    todo_list.reload
     set_items_frame_pagination
 
     respond_to do |format|
@@ -48,6 +50,7 @@ class ItemsController < ApplicationController
   def complete
     @item = Todos::UpdateItemService.call(item:, completed: true)
     flash.now[:notice] = "Item completed successfully."
+    todo_list.reload
     set_items_frame_pagination
 
     respond_to do |format|
@@ -86,6 +89,8 @@ class ItemsController < ApplicationController
     params.permit(:page, item_ids: [])
   end
 
+  # Uses perform_now intentionally: the Turbo Stream response needs the
+  # updated data synchronously. The job class is reusable for async paths.
   def perform_bulk_update(item_ids:, all:)
     task_id = SecureRandom.uuid
 
@@ -110,4 +115,3 @@ class ItemsController < ApplicationController
     @pagy, @items = pagy(:offset, todo_list.items.order(id: :desc), limit: 10, page: params[:page] || 1)
   end
 end
-

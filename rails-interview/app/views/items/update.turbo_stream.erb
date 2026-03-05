@@ -1,7 +1,5 @@
-<% todo_list.reload %>
 <%= render "shared/flash_toast_streams", formats: [:html] %>
 
 <%= turbo_stream.replace dom_id(item) do %>
-  <%= render 'items/item', item: %>
+  <%= render 'items/item', item:, current_page: params[:page] %>
 <% end %>
-

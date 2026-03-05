@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-import { createConsumer } from "@rails/actioncable"
+import consumer from "channels/consumer"
 
 export default class extends Controller {
   static values = {
@@ -8,7 +8,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.subscription = createConsumer().subscriptions.create(
+    this.subscription = consumer.subscriptions.create(
       { channel: "TodoListChannel", todo_list_id: this.todoListIdValue },
       {
         received: (data) => {
